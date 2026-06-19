@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">User Dashboard</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Track your incidents and uploaded evidence
+        </p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-bug" style="color: var(--accent-gold);"></i> Your Incidents
+            <span class="count-badge">{{ incidents|length }} total</span>
+        </h2>
+        <a href="{{ url_for('incident.report') }}" class="btn btn-primary" style="padding: 0.5rem 1.8rem; font-size: 0.85rem;">
+            <i class="fas fa-plus" style="margin-right: 0.4rem;"></i> Report New Incident
+        </a>
+    </div>
+
+    {% if incidents %}
+        <div class="feature-grid" style="margin: 0 0 2rem 0;">
+            {% for inc in incidents %}
+            <div class="feature-card" style="padding: 1.5rem;">
+                <!-- Incident Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <span class="badge" style="font-family: 'Courier New', monospace; font-size:0.7rem; padding:0.2rem 0.8rem; background:rgba(42,107,111,0.08); color:var(--text-secondary); border:1px solid rgba(42,107,111,0.06);">
+                        {{ inc.incident_id }}
+                    </span>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <span class="status-badge 
+                            {% if inc.status == 'OPEN' %}verified
+                            {% elif inc.status == 'CLOSED' %}encrypted
+                            {% else %}pending{% endif %}"
+                            style="font-size:0.6rem; padding:0.15rem 0.6rem;">
+                            {{ inc.status }}
+                        </span>
+                        <span class="status-badge 
+                            {% if inc.severity == 'HIGH' %}pending
+                            {% elif inc.severity == 'MEDIUM' %}encrypted
+                            {% else %}verified{% endif %}"
+                            style="font-size:0.6rem; padding:0.15rem 0.6rem;
+                                   {% if inc.severity == 'HIGH' %}background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.15); color:#ef4444;
+                                   {% elif inc.severity == 'MEDIUM' %}background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.15); color:#fbbf24;
+                                   {% else %}background:rgba(74,222,128,0.08); border-color:rgba(74,222,128,0.15); color:#4ade80;{% endif %}">
+                            {{ inc.severity }}
+                        </span>
+                    </div>
+                </div>
+                <div class="title" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ inc.title }}</div>
+                <div class="desc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                    {{ inc.description[:100] }}{% if inc.description|length > 100 %}…{% endif %}
+                </div>
+
+                <!-- ─── Evidence List ─── -->
+                <div style="margin: 0.8rem 0; padding-top: 0.8rem; border-top: 1px solid rgba(42,107,111,0.06);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.4rem;">
+                        <i class="fas fa-file-alt" style="margin-right: 0.3rem;"></i> Evidence
+                        <span class="badge" style="font-size:0.6rem; background:rgba(42,107,111,0.06); color:var(--text-secondary); padding:0.1rem 0.5rem; border-radius:1rem;">
+                            {{ inc.evidence_count|default(0) }}
+                        </span>
+                    </div>
+                    {% if inc.evidence_list %}
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.8rem;">
+                            {% for ev in inc.evidence_list %}
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0; border-bottom: 1px solid rgba(42,107,111,0.04);">
+                                <span style="color: var(--text-secondary);">
+                                    <i class="fas fa-file" style="color: var(--accent-teal-light); margin-right: 0.4rem;"></i>
+                                    {{ ev.file_name }}
+                                </span>
+                                <span style="font-family: monospace; font-size: 0.65rem; color: var(--text-muted);">
+                                    {{ ev.sha256_hash[:8] }}…
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.2rem 0;">No evidence uploaded yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- ─── Upload Form ─── -->
+                <form action="{{ url_for('evidence.upload_evidence', case_id=inc.incident_id) }}" 
+                      method="post" 
+                      enctype="multipart/form-data" 
+                      style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <input type="file" name="file" required 
+                           style="font-size:0.7rem; color:var(--text-secondary); background:var(--bg-card); padding:0.3rem 0.6rem; border-radius:0.5rem; border:1px solid rgba(42,107,111,0.08);">
+                    <button type="submit" class="btn btn-primary" style="padding:0.2rem 1rem; font-size:0.7rem;">
+                        <i class="fas fa-upload" style="margin-right:0.3rem;"></i> Upload
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 2rem; text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-folder-open" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 0.8rem; display: block;"></i>
+            <p style="color: var(--text-secondary); font-size: 1.05rem;">No incidents reported yet.</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Click "Report New Incident" to get started.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

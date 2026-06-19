@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Governance Panel</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Manage officer approvals and voting.
+        </p>
+    </div>
+
+    <!-- This can be a duplicate of the pending section in admin dashboard -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-vote-yea" style="color: var(--accent-gold);"></i> Pending Proposals
+            <span class="count-badge">{{ proposals|length }}</span>
+        </h2>
+    </div>
+    {% if proposals %}
+        <div class="chain-viz" style="padding: 1rem;">
+            <table class="vault-table">
+                <thead>
+                    <tr><th>Proposal ID</th><th>Target</th><th>Specialization</th><th>Status</th><th>Vote</th></tr>
+                </thead>
+                <tbody>
+                    {% for prop in proposals %}
+                    <tr>
+                        <td>{{ prop.proposal_id }}</td>
+                        <td>{{ prop.target_name }}</td>
+                        <td>{{ prop.specialization }}</td>
+                        <td>{{ prop.status }}</td>
+                        <td>
+                            <a href="{{ url_for('governance.vote', proposal_id=prop.proposal_id, choice='approve') }}" class="btn btn-primary" style="padding:0.15rem 0.8rem; font-size:0.65rem;">
+                                Approve
+                            </a>
+                            <a href="{{ url_for('governance.vote', proposal_id=prop.proposal_id, choice='reject') }}" class="btn btn-ghost" style="padding:0.15rem 0.8rem; font-size:0.65rem; color:#ef4444; border-color:rgba(239,68,68,0.2);">
+                                Reject
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 1.5rem; text-align: center;">
+            <p style="color: var(--text-secondary);">No pending proposals.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

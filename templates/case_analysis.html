@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Case #{{ incident.incident_id }}</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            {{ incident.title }}
+        </p>
+    </div>
+
+    <!-- Case Details -->
+    <div class="chain-viz" style="margin: 1.5rem 0 2rem; padding: 2rem;">
+        <div class="viz-header" style="margin-bottom: 1.2rem;">
+            <h4><i class="fas fa-info-circle" style="color:var(--accent-teal-light);"></i> Case Details</h4>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.95rem;">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Title</span>
+                <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.1rem;">{{ incident.title }}</p>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Status</span>
+                <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.1rem;">{{ incident.status }}</p>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Severity</span>
+                <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.1rem;">{{ incident.severity }}</p>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Description</span>
+                <p style="color: var(--text-secondary); margin-top: 0.1rem; line-height: 1.6;">{{ incident.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evidence Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-file-alt" style="color: var(--accent-gold);"></i> Evidence
+            <span class="count-badge">{{ evidence_list|length }} items</span>
+        </h2>
+        <!-- Upload new evidence button -->
+        <a href="{{ url_for('evidence.upload_evidence_page', case_id=incident.incident_id) }}" class="btn btn-primary" style="padding: 0.5rem 1.8rem; font-size: 0.85rem;">
+            <i class="fas fa-upload" style="margin-right: 0.4rem;"></i> Upload Evidence
+        </a>
+    </div>
+
+    {% if evidence_list %}
+        <div class="feature-grid" style="margin: 0 0 2rem 0;">
+            {% for ev in evidence_list %}
+            <div class="feature-card" style="padding: 1.5rem;">
+                <div class="icon-wrap" style="width: 44px; height: 44px; font-size: 1.2rem;">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="title" style="font-size: 1rem; margin-bottom: 0.2rem;">{{ ev.file_name }}</div>
+                <div class="desc" style="font-size: 0.8rem; margin-bottom: 0.8rem;">
+                    <span style="font-family: 'Courier New', monospace; color: var(--text-muted);">SHA256: {{ ev.sha256_hash[:16] }}…</span>
+                    {% if ev.ipfs_cid %}
+                        <br><span style="font-size:0.7rem; color:var(--accent-teal-light);">IPFS: {{ ev.ipfs_cid[:12] }}…</span>
+                    {% endif %}
+                    {% if ev.supersedes %}
+                        <br><span style="font-size:0.65rem; color:var(--accent-gold);">(supersedes {{ ev.supersedes }})</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <a href="{{ url_for('investigator.verify_evidence', evidence_id=ev.evidence_id, case_id=incident.incident_id) }}" 
+                       class="btn btn-primary" style="padding:0.2rem 1rem; font-size:0.7rem;">
+                        <i class="fas fa-check-circle" style="margin-right:0.3rem;"></i> Verify
+                    </a>
+                    <!-- Update button: re-upload -->
+                    <a href="{{ url_for('evidence.update_evidence', evidence_id=ev.evidence_id, case_id=incident.incident_id) }}" 
+                       class="btn btn-outline" style="padding:0.2rem 1rem; font-size:0.7rem;">
+                        <i class="fas fa-pen" style="margin-right:0.3rem;"></i> Update
+                    </a>
+                    <!-- Delete button (soft delete) -->
+                    <form action="{{ url_for('evidence.delete_evidence', evidence_id=ev.evidence_id, case_id=incident.incident_id) }}" 
+                          method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-ghost" style="padding:0.2rem 1rem; font-size:0.7rem; color:#ef4444; border-color:rgba(239,68,68,0.2);" 
+                                onclick="return confirm('Mark this evidence as deleted? This action can be reversed by an admin.')">
+                            <i class="fas fa-trash" style="margin-right:0.3rem;"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 2rem; text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-folder-open" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 0.8rem; display: block;"></i>
+            <p style="color: var(--text-secondary);">No evidence uploaded for this case yet.</p>
+        </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; padding-bottom: 1rem;">
+        <a href="{{ url_for('investigator.update_investigation', case_id=incident.incident_id) }}" class="btn btn-primary">
+            <i class="fas fa-pen" style="margin-right: 0.5rem;"></i> Update Investigation
+        </a>
+        <a href="{{ url_for('investigator.dashboard') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

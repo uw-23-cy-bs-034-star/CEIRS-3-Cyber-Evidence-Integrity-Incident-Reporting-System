@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEIRS | Cyber Evidence Integrity System</title>
+    <!-- Bootstrap 5 CSS (required for Toasts) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ─────────────── RESET & BASE ─────────────── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-primary: #0b0f1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.08);
+            --text-primary: #eef4fa;
+            --text-secondary: #a0b3c0;
+            --text-muted: #6a7d8a;
+            --accent-teal: #2a6b6f;
+            --accent-teal-light: #4d8f8f;
+            --accent-gold: #c9a85e;
+            --shadow-heavy: 0 30px 60px -20px rgba(0,0,0,0.8);
+            --radius-xl: 2.5rem;
+            --radius-lg: 1.8rem;
+        }
+        [data-theme="light"] {
+            --bg-primary: #e6f2e6;
+            --bg-secondary: #d0e6d0;
+            --bg-card: rgba(255,255,255,0.7);
+            --bg-card-hover: rgba(255,255,255,0.85);
+            --text-primary: #1a2e1a;
+            --text-secondary: #3d5a3d;
+            --text-muted: #4d6b4d;
+            --shadow-heavy: 0 30px 60px -20px rgba(0,0,0,0.12);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.6s ease, color 0.6s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .gradient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(42,107,111,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(201,168,94,0.08) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        @keyframes bgFloat { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(2%,-2%) scale(1.05); } }
+        .content { position:relative; z-index:2; max-width:1440px; margin:0 auto; padding:0 2rem 2rem; }
+
+        /* ─── NAVBAR ─── */
+        .navbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(42,107,111,0.08);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            position: sticky;
+            top: 0.5rem;
+            z-index: 100;
+            border-radius: var(--radius-xl);
+            margin-top: 0.5rem;
+            box-shadow: var(--shadow-heavy);
+        }
+        .logo-wrap { display:flex; align-items:center; gap:0.75rem; }
+        .logo-icon {
+            width:38px; height:38px; border-radius:12px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-gold));
+            display:flex; align-items:center; justify-content:center;
+            font-weight:900; font-size:1rem; color:#fff;
+        }
+        .logo {
+            font-size:1.5rem; font-weight:800;
+            background: linear-gradient(135deg, var(--accent-teal-light), var(--accent-gold));
+            -webkit-background-clip: text; background-clip: text; color:transparent;
+        }
+        .nav-links { display:flex; gap:2rem; align-items:center; flex-wrap:wrap; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gold);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-actions { display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; }
+        .theme-toggle {
+            cursor:pointer; font-size:1.1rem; color:var(--text-secondary);
+            background:none; border:none; padding:0.4rem;
+            border-radius:50%; width:36px; height:36px;
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.06);
+        }
+        .theme-toggle:hover { color:var(--accent-gold); transform:rotate(20deg); }
+        .search-wrap { position:relative; }
+        .search-wrap input {
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:3rem;
+            padding:0.5rem 1rem 0.5rem 2.8rem;
+            color:var(--text-primary);
+            font-size:0.85rem;
+            width:200px;
+            transition:0.4s;
+            outline:none;
+        }
+        .search-wrap input:focus { width:280px; border-color:var(--accent-teal); }
+        .search-wrap .search-icon {
+            position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+            color:var(--text-muted);
+        }
+        .status-dot {
+            width:10px; height:10px; border-radius:50%; background:#4ade80;
+            animation:pulseDot 1.8s ease-in-out infinite; display:inline-block;
+        }
+        @keyframes pulseDot { 0%,100% { opacity:0.4; transform:scale(0.8); } 50% { opacity:1; transform:scale(1.2); } }
+
+        /* ─── FOOTER ─── */
+        footer {
+            text-align:center; padding:2rem; font-size:0.8rem; color:var(--text-muted);
+            border-top:1px solid rgba(42,107,111,0.04);
+            margin-top:2rem;
+            background:var(--bg-card);
+            backdrop-filter:blur(8px);
+            border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+        }
+        footer strong { color:var(--accent-teal-light); }
+        .footer-links { display:flex; gap:1.5rem; justify-content:center; margin-top:0.6rem; flex-wrap:wrap; }
+        .footer-links a { color:var(--text-muted); text-decoration:none; font-size:0.75rem; }
+        .footer-links a:hover { color:var(--text-secondary); }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width:768px) {
+            .navbar { flex-direction:column; align-items:stretch; padding:1rem; }
+            .nav-links { justify-content:center; gap:1rem; }
+            .nav-actions { justify-content:center; }
+            .search-wrap input { width:100%; }
+            .search-wrap input:focus { width:100%; }
+        }
+
+        /* ─── TOAST CONTAINER ─── */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            width: 100%;
+        }
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(42,107,111,0.08);
+            box-shadow: var(--shadow-heavy);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.8rem;
+        }
+        .toast-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(42,107,111,0.04);
+            color: var(--text-secondary);
+        }
+        .toast-header .btn-close {
+            filter: invert(1);
+        }
+        [data-theme="light"] .toast-header .btn-close {
+            filter: invert(0);
+        }
+        .toast-body {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="content">
+        <nav class="navbar">
+            <div class="logo-wrap">
+                <div class="logo-icon">⧫</div>
+                <span class="logo">CEIRS</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'USER' %}
+                        <a href="{{ url_for('victim.dashboard') }}">Dashboard</a>
+                    {% elif current_user.role == 'OFFICER' %}
+                        <a href="{{ url_for('investigator.dashboard') }}">Dashboard</a>
+                    {% elif current_user.role == 'ADMIN' %}
+                        <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                    <a href="{{ url_for('auth.register') }}">Register</a>
+                {% endif %}
+            </div>
+            <div class="nav-actions">
+                <div class="search-wrap">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon" id="themeIcon"></i></button>
+                <span class="status-dot"></span>
+            </div>
+        </nav>
+
+        <!-- ─── PAGE CONTENT ─── -->
+        {% block content %}{% endblock %}
+
+        <footer>
+            <div>CEIRS v3 · Designed by <strong>Mueez Razzag</strong>, University of Wah</div>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Support</a>
+                <a href="#">Docs</a>
+                <a href="#">Status</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ─── TOAST CONTAINER ─── -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS (required for toasts) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ─── THEME TOGGLE ───
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+        const saved = localStorage.getItem('theme');
+        setTheme(saved || 'dark');
+
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ─── FLASH MESSAGES AS TOASTS ───
+        function showToast(message, category = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const colors = {
+                success: '#4ade80',
+                danger: '#ef4444',
+                warning: '#fbbf24',
+                info: '#60a5fa'
+            };
+            const icons = {
+                success: 'fa-check-circle',
+                danger: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            const color = colors[category] || '#60a5fa';
+            const icon = icons[category] || 'fa-info-circle';
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.setAttribute('role', 'alert');
+            toast.style.borderLeft = `4px solid ${color}`;
+
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="fas ${icon}" style="color:${color}; margin-right:0.6rem;"></i>
+                    <strong class="me-auto">${category.charAt(0).toUpperCase() + category.slice(1)}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
+
+            container.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { delay: 6000 });
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+
+        // ─── RENDER FLASH MESSAGES ───
+        document.addEventListener('DOMContentLoaded', function() {
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        showToast("{{ message|e }}", "{{ category }}");
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

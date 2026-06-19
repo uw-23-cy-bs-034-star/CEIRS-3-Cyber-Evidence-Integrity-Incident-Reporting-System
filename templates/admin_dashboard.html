@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <!-- ─── HEADER ─── -->
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">
+                    <span class="highlight">Admin Dashboard</span>
+                </h1>
+                <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+                    System overview, officer management, and audit logs.
+                </p>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; background: var(--bg-card); padding: 0.3rem 1rem; border-radius: 20px;">
+                <i class="fas fa-sync-alt" style="margin-right: 0.4rem;"></i>
+                Last updated: {{ now | ctime if now else "just now" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── STATS (Glass Containers) ─── -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+        <!-- ... stats cards ... (same as before) -->
+    </div>
+
+    <!-- ─── PENDING OFFICER APPROVALS ─── -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-user-clock" style="color: var(--accent-gold);"></i> Pending Approvals
+            <span class="count-badge">{{ pending_officers|length }}</span>
+        </h2>
+        <a href="{{ url_for('governance.propose') }}" class="btn btn-primary" style="padding: 0.5rem 1.8rem; font-size: 0.85rem;">
+            <i class="fas fa-user-plus" style="margin-right: 0.4rem;"></i> Propose Officer
+        </a>
+    </div>
+
+    <div class="chain-viz" style="padding: 1.2rem; margin-bottom: 2rem;">
+        {% if pending_officers %}
+            <table class="vault-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr><th style="padding:0.8rem 1rem;">Username</th><th style="padding:0.8rem 1rem;">Name</th><th style="padding:0.8rem 1rem;">Specialization</th><th style="padding:0.8rem 1rem;">Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for officer in pending_officers %}
+                    <tr>
+                        <td style="padding:0.8rem 1rem;">{{ officer.user_id }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ officer.name }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ officer.specialization }}</td>
+                        <td style="padding:0.8rem 1rem;">
+                            <a href="{{ url_for('admin.approve_officer', username=officer.user_id) }}" class="btn btn-primary" style="padding:0.2rem 1rem; font-size:0.7rem;">
+                                <i class="fas fa-check" style="margin-right:0.3rem;"></i> Approve
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="color: var(--text-secondary);">No pending approvals.</p>
+                <a href="{{ url_for('governance.propose') }}" class="btn btn-primary" style="margin-top:0.5rem; padding:0.4rem 1.2rem; font-size:0.85rem;">
+                    <i class="fas fa-user-plus" style="margin-right:0.4rem;"></i> Propose the first officer
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── ALL OFFICERS ─── -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-users" style="color: var(--accent-teal-light);"></i> All Officers
+            <span class="count-badge">{{ officers|length }}</span>
+        </h2>
+    </div>
+
+    <div class="chain-viz" style="padding: 1.2rem; margin-bottom: 2rem;">
+        {% if officers %}
+            <table class="vault-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding:0.8rem 1rem;">Username</th>
+                        <th style="padding:0.8rem 1rem;">Specialization</th>
+                        <th style="padding:0.8rem 1rem;">Active Cases</th>
+                        <th style="padding:0.8rem 1rem;">Status</th>
+                        <th style="padding:0.8rem 1rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for officer in officers %}
+                    <tr>
+                        <td style="padding:0.8rem 1rem;">{{ officer.user_id }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ officer.specialization }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ officer.active_cases }}</td>
+                        <td style="padding:0.8rem 1rem;">
+                            <span class="status-badge 
+                                {% if officer.status == 'ACTIVE' %}verified
+                                {% elif officer.status == 'SUSPENDED' %}pending
+                                {% else %}encrypted{% endif %}"
+                                style="font-size:0.7rem; padding:0.3rem 0.8rem;">
+                                {{ officer.status }}
+                            </span>
+                        </td>
+                        <td style="padding:0.8rem 1rem;">
+                            {% if officer.status == 'SUSPENDED' %}
+                                <a href="{{ url_for('admin.activate_officer', username=officer.user_id) }}" class="btn btn-primary" style="padding:0.2rem 1rem; font-size:0.7rem;">Activate</a>
+                            {% else %}
+                                <a href="{{ url_for('admin.suspend_officer', username=officer.user_id) }}" class="btn btn-outline" style="padding:0.2rem 1rem; font-size:0.7rem; border-color:rgba(251,191,36,0.2); color:#fbbf24;">Suspend</a>
+                            {% endif %}
+                            <a href="{{ url_for('admin.remove_officer', username=officer.user_id) }}" class="btn btn-ghost" style="padding:0.2rem 1rem; font-size:0.7rem; color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="return confirm('Remove this officer?')">Remove</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="color: var(--text-secondary);">No officers registered yet.</p>
+                <a href="{{ url_for('governance.propose') }}" class="btn btn-primary" style="margin-top:0.5rem; padding:0.4rem 1.2rem; font-size:0.85rem;">
+                    <i class="fas fa-user-plus" style="margin-right:0.4rem;"></i> Add your first officer
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── ALL CASES ─── -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-folder-open" style="color: var(--accent-gold);"></i> All Cases
+            <span class="count-badge">{{ cases|length }}</span>
+        </h2>
+    </div>
+
+    <div class="chain-viz" style="padding: 1.2rem; margin-bottom: 2rem;">
+        {% if cases %}
+            <table class="vault-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding:0.8rem 1rem;">Case ID</th>
+                        <th style="padding:0.8rem 1rem;">Victim</th>
+                        <th style="padding:0.8rem 1rem;">Title</th>
+                        <th style="padding:0.8rem 1rem;">Assigned Officer</th>
+                        <th style="padding:0.8rem 1rem;">Status</th>
+                        <th style="padding:0.8rem 1rem;">Evidence Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                    <tr>
+                        <td style="padding:0.8rem 1rem;">{{ case.incident_id }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ case.victim_id }}</td>
+                        <td style="padding:0.8rem 1rem;">{{ case.title[:40] }}{% if case.title|length > 40 %}…{% endif %}</td>
+                        <td style="padding:0.8rem 1rem;">{{ case.assigned_investigator or 'Unassigned' }}</td>
+                        <td style="padding:0.8rem 1rem;">
+                            <span class="status-badge 
+                                {% if case.status == 'OPEN' %}verified
+                                {% elif case.status == 'CLOSED' %}encrypted
+                                {% else %}pending{% endif %}"
+                                style="font-size:0.7rem; padding:0.3rem 0.8rem;">
+                                {{ case.status }}
+                            </span>
+                        </td>
+                        <td style="padding:0.8rem 1rem;">{{ case.evidence_count if case.evidence_count is defined else 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 1rem 0;">
+                <p style="color: var(--text-secondary);">No cases reported yet.</p>
+                <a href="{{ url_for('incident.report') }}" class="btn btn-primary" style="margin-top:0.5rem; padding:0.4rem 1.2rem; font-size:0.85rem;">
+                    <i class="fas fa-plus-circle" style="margin-right:0.4rem;"></i> Report the first case
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── MERGED: CHAIN OF CUSTODY + VIOLATIONS ─── -->
+    <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem; margin: 2rem 0 1.2rem;">
+        <i class="fas fa-clipboard-list" style="color: var(--accent-teal-light);"></i> Audit & Security Log
+        <span class="count-badge">{{ (custody_events|length) + (violations|length) }}</span>
+    </h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; margin-bottom: 2rem;">
+        <!-- Chain of Custody -->
+        <div class="feed-section" style="margin:0; padding:1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fas fa-link" style="color: var(--accent-teal-light);"></i> Chain of Custody
+                    <span class="count-badge">{{ custody_events|length }}</span>
+                </h4>
+            </div>
+            {% if custody_events %}
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table class="vault-table" style="font-size: 0.8rem; width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding:0.6rem 0.8rem;">Evidence</th>
+                                <th style="padding:0.6rem 0.8rem;">Action</th>
+                                <th style="padding:0.6rem 0.8rem;">Actor</th>
+                                <th style="padding:0.6rem 0.8rem;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in custody_events[:20] %}
+                            <tr>
+                                <td style="padding:0.6rem 0.8rem;">{{ event.evidence_id[:12] if event.evidence_id else '-' }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ event.action }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ event.actor_id[:12] }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ event.timestamp | ctime | truncate(16, True) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if custody_events|length > 20 %}
+                        <div style="text-align:center; margin-top:0.5rem; font-size:0.7rem; color:var(--text-muted);">
+                            Showing 20 of {{ custody_events|length }} events
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">No custody events yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Violations -->
+        <div class="feed-section" style="margin:0; padding:1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Violations
+                    <span class="count-badge">{{ violations|length }}</span>
+                </h4>
+            </div>
+            {% if violations %}
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table class="vault-table" style="font-size: 0.8rem; width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding:0.6rem 0.8rem;">Type</th>
+                                <th style="padding:0.6rem 0.8rem;">Target</th>
+                                <th style="padding:0.6rem 0.8rem;">Reporter</th>
+                                <th style="padding:0.6rem 0.8rem;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in violations[:20] %}
+                            <tr>
+                                <td style="padding:0.6rem 0.8rem;">{{ v.transaction.type }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ v.transaction.target_id[:12] }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ v.transaction.reporter[:12] }}</td>
+                                <td style="padding:0.6rem 0.8rem;">{{ v.transaction.timestamp | ctime | truncate(16, True) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if violations|length > 20 %}
+                        <div style="text-align:center; margin-top:0.5rem; font-size:0.7rem; color:var(--text-muted);">
+                            Showing 20 of {{ violations|length }} violations
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">No violations detected.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

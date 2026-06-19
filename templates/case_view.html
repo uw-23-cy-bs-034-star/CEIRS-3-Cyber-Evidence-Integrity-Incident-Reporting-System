@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Case #{{ incident.incident_id }}</span>
+        </h1>
+        <p style="color: var(--text-secondary);">{{ incident.title }}</p>
+    </div>
+
+    <div class="chain-viz" style="padding: 2rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div><span style="color: var(--text-muted); font-size:0.75rem;">Status</span><br><strong>{{ incident.status }}</strong></div>
+            <div><span style="color: var(--text-muted); font-size:0.75rem;">Severity</span><br><strong>{{ incident.severity }}</strong></div>
+            <div style="grid-column: 1 / -1;"><span style="color: var(--text-muted); font-size:0.75rem;">Description</span><br><p style="color: var(--text-secondary);">{{ incident.description }}</p></div>
+        </div>
+    </div>
+
+    <h2 style="font-weight: 700; font-size: 1.4rem; margin-bottom: 1.2rem;">Evidence</h2>
+    {% if evidence_list %}
+        <div class="feature-grid" style="margin-bottom: 2rem;">
+            {% for ev in evidence_list %}
+            <div class="feature-card" style="padding: 1.5rem;">
+                <div class="icon-wrap" style="width:44px; height:44px; font-size:1.2rem;">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="title" style="font-size:1rem;">{{ ev.file_name }}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">{{ ev.sha256_hash[:16] }}…</div>
+                <a href="{{ url_for('investigator.verify_evidence', evidence_id=ev.evidence_id, case_id=incident.incident_id) }}" class="btn btn-primary" style="margin-top:0.8rem; padding:0.3rem 1rem; font-size:0.75rem;">
+                    <i class="fas fa-check-circle"></i> Verify
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 1.5rem; text-align: center; margin-bottom: 2rem;">
+            <p style="color: var(--text-secondary);">No evidence uploaded yet.</p>
+        </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('investigator.update_investigation', case_id=incident.incident_id) }}" class="btn btn-primary">
+            <i class="fas fa-pen"></i> Update Investigation
+        </a>
+        <a href="{{ url_for('investigator.dashboard') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+{% endblock %}

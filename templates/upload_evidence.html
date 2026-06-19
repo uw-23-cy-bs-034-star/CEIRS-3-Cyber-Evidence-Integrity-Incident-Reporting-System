@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active" style="max-width: 600px; margin: 0 auto;">
+    <div class="vault-header" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Upload Evidence</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Case: <strong style="color: var(--text-primary);">{{ case_id }}</strong>
+            {% if evidence_id %}
+                (updating {{ evidence_id }})
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="chain-viz" style="padding: 2rem;">
+        <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-primary); font-size: 0.9rem;">
+                    <i class="fas fa-file-upload" style="color: var(--accent-teal-light); margin-right: 0.4rem;"></i> Select File
+                </label>
+                <input type="file" name="file" required
+                       style="width: 100%; padding: 0.8rem; background: var(--bg-card); border: 1px solid rgba(42,107,111,0.08); border-radius: 1.2rem; color: var(--text-primary); font-size: 0.95rem; outline: none;">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+                    Allowed types: PNG, JPG, PDF, TXT, CSV, LOG, EML, JSON, MP4
+                </p>
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 0.9rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem;">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Evidence
+            </button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="{{ url_for('investigator.view_case', case_id=case_id) }}" class="btn btn-outline" style="padding: 0.5rem 2rem; font-size: 0.9rem;">
+                <i class="fas fa-arrow-left" style="margin-right: 0.4rem;"></i> Back to Case
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

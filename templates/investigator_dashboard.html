@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+
+    <!-- ─── Page Header ─── -->
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Investigator Dashboard</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Overview of your assigned cases and recent activity.
+        </p>
+    </div>
+
+    <!-- ─── Assigned Cases ─── -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+        <h2 style="font-weight: 700; font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-briefcase" style="color: var(--accent-gold);"></i> Assigned Cases
+            <span class="count-badge">{{ cases|length }} total</span>
+        </h2>
+        {# Optional "Create New Case" button – kept as a Jinja comment to avoid url_for evaluation #}
+        {# <a href="{{ url_for('investigator.create_case') }}" class="btn btn-primary" style="padding: 0.5rem 1.8rem; font-size: 0.85rem;">
+            <i class="fas fa-plus" style="margin-right: 0.4rem;"></i> New Case
+        </a> #}
+    </div>
+
+    {% if cases %}
+        <div class="feature-grid" style="margin: 0 0 2rem 0;">
+            {% for case in cases %}
+            <div class="feature-card" style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <span class="badge" style="font-family: 'Courier New', monospace; font-size:0.7rem; padding:0.2rem 0.8rem; background:rgba(42,107,111,0.08); color:var(--text-secondary); border:1px solid rgba(42,107,111,0.06);">
+                        {{ case.incident_id }}
+                    </span>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <span class="status-badge 
+                            {% if case.status == 'OPEN' %}verified
+                            {% elif case.status == 'CLOSED' %}encrypted
+                            {% else %}pending{% endif %}"
+                            style="font-size:0.6rem; padding:0.15rem 0.6rem;">
+                            {{ case.status }}
+                        </span>
+                        <span class="status-badge 
+                            {% if case.severity == 'HIGH' %}pending
+                            {% elif case.severity == 'MEDIUM' %}encrypted
+                            {% else %}verified{% endif %}"
+                            style="font-size:0.6rem; padding:0.15rem 0.6rem;
+                                   {% if case.severity == 'HIGH' %}background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.15); color:#ef4444;
+                                   {% elif case.severity == 'MEDIUM' %}background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.15); color:#fbbf24;
+                                   {% else %}background:rgba(74,222,128,0.08); border-color:rgba(74,222,128,0.15); color:#4ade80;{% endif %}">
+                            {{ case.severity }}
+                        </span>
+                    </div>
+                </div>
+                <div class="title" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ case.title }}</div>
+                <div class="desc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    {{ case.description[:100] }}{% if case.description|length > 100 %}…{% endif %}
+                </div>
+                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <a href="{{ url_for('investigator.view_case', case_id=case.incident_id) }}" 
+                       class="btn btn-primary" style="padding: 0.3rem 1.2rem; font-size: 0.75rem;">
+                        <i class="fas fa-eye" style="margin-right: 0.3rem;"></i> View Case
+                    </a>
+                    {# Optional "Update" button – kept as a Jinja comment #}
+                    {# <a href="{{ url_for('investigator.update_investigation', case_id=case.incident_id) }}" 
+                       class="btn btn-outline" style="padding: 0.3rem 1.2rem; font-size: 0.75rem;">
+                        <i class="fas fa-pen"></i>
+                    </a> #}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 2rem; text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-folder-open" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 0.8rem; display: block;"></i>
+            <p style="color: var(--text-secondary); font-size: 1.05rem;">No cases assigned to you yet.</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">New cases will appear here once assigned by an administrator.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

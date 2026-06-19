@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active">
+    <div class="vault-header" style="margin-top: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Violation Logs</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Complete history of all security violations.
+        </p>
+    </div>
+
+    {% if violations %}
+        <div class="feed-section" style="margin-top: 1.5rem;">
+            {% for v in violations %}
+            <div class="feed-item">
+                <div class="feed-icon" style="background:rgba(239,68,68,0.08);">
+                    <i class="fas fa-bell" style="color:#ef4444;"></i>
+                </div>
+                <div class="feed-content">
+                    <div class="feed-title">
+                        <strong>{{ v.transaction.type }}</strong> – Target: {{ v.transaction.target_id }}
+                    </div>
+                    <div class="feed-meta">
+                        <span>Reporter: {{ v.transaction.reporter }}</span>
+                        <span>Details: {{ v.transaction.details }}</span>
+                        <span>{{ v.transaction.timestamp | ctime }}</span>
+                    </div>
+                </div>
+                <span class="feed-status" style="background:rgba(239,68,68,0.06); color:#ef4444; border-color:rgba(239,68,68,0.08);">
+                    <i class="fas fa-exclamation-circle" style="margin-right:0.3rem;"></i> Logged
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="chain-viz" style="padding: 2rem; text-align: center; margin-top: 1.5rem;">
+            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #4ade80; margin-bottom: 0.8rem; display: block;"></i>
+            <p style="color: var(--text-secondary);">No violations recorded. System is secure.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

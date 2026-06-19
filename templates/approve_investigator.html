@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-section active" style="max-width: 600px; margin: 0 auto;">
+    <div class="vault-header" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;">
+            <span class="highlight">Propose New Officer</span>
+        </h1>
+        <p style="color: var(--text-secondary); margin-top: 0.2rem;">
+            Submit a proposal for a new officer. Requires unanimous admin approval.
+        </p>
+    </div>
+
+    <div class="chain-viz" style="padding: 2rem;">
+        <form method="post" style="display: flex; flex-direction: column; gap: 1.2rem;">
+            <div class="search-wrap" style="width: 100%;">
+                <i class="fas fa-user search-icon" style="left: 1rem; color: var(--text-muted);"></i>
+                <input type="text" name="username" placeholder="Username" required
+                       style="width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; background: var(--bg-card); border: 1px solid rgba(42,107,111,0.08); border-radius: 3rem; color: var(--text-primary); font-size: 0.95rem; transition: 0.3s; outline: none; font-family: inherit;">
+            </div>
+            <div class="search-wrap" style="width: 100%;">
+                <i class="fas fa-id-card search-icon" style="left: 1rem; color: var(--text-muted);"></i>
+                <input type="text" name="name" placeholder="Full Name" required
+                       style="width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; background: var(--bg-card); border: 1px solid rgba(42,107,111,0.08); border-radius: 3rem; color: var(--text-primary); font-size: 0.95rem; transition: 0.3s; outline: none; font-family: inherit;">
+            </div>
+            <div class="search-wrap" style="width: 100%;">
+                <i class="fas fa-bolt search-icon" style="left: 1rem; color: var(--text-muted);"></i>
+                <input type="text" name="specialization" placeholder="Specialization" required
+                       style="width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; background: var(--bg-card); border: 1px solid rgba(42,107,111,0.08); border-radius: 3rem; color: var(--text-primary); font-size: 0.95rem; transition: 0.3s; outline: none; font-family: inherit;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 0.9rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem;">
+                <i class="fas fa-paper-plane"></i> Create Proposal
+            </button>
+        </form>
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline" style="padding: 0.5rem 2rem; font-size: 0.9rem;">
+                <i class="fas fa-arrow-left" style="margin-right: 0.4rem;"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
